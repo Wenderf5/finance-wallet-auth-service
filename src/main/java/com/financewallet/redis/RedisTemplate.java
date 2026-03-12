@@ -28,9 +28,14 @@ public class RedisTemplate {
         try {
             StatefulRedisConnection<String, String> connection = this.client.connect();
             RedisCommands<String, String> redisCommands = connection.sync();
-            String result = redisCommands.get(key);
-            connection.close();
 
+            String result = redisCommands.get(key);
+            if (result == null) {
+                throw new Exception("The " + key + " key was not found.");
+            }
+            
+            connection.close();
+            
             return result;
         } catch (Exception e) {
             throw new RedisOperationException(e.getMessage());
