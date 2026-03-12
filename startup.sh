@@ -22,5 +22,3 @@ echo "Restarting server..."
 /opt/jboss/wildfly/bin/jboss-cli.sh --connect --command=":shutdown"
 wait $WILDFLY_PID
 exec /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0
-
-wait #Leave the script running forever
