@@ -14,6 +14,7 @@ import com.financewallet.exceptions.RedisOperationException;
 import com.financewallet.redis.RedisTemplate;
 
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisException;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 
@@ -51,6 +52,18 @@ public class RedisTemplateTest {
     }
 
     @Test
+    public void shouldThrowAnRedisOperationExceptionForSet() {
+        when(this.client.connect()).thenReturn(this.connection);
+        when(this.connection.sync()).thenReturn(this.redisCommands);
+        when(this.redisCommands.set("testKey", "testValue")).thenThrow(RedisException.class);
+
+        assertThrows(RedisOperationException.class, () -> this.redisTemplate.set("testKey", "testValue"));
+        verify(this.client).connect();
+        verify(this.connection).sync();
+        verify(this.redisCommands).set("testKey", "testValue");
+    }
+
+    @Test
     public void shouldReturnFromRedisTheValeuOfKey() {
         when(this.client.connect()).thenReturn(this.connection);
         when(this.connection.sync()).thenReturn(this.redisCommands);
@@ -66,7 +79,7 @@ public class RedisTemplateTest {
     }
 
     @Test
-    public void shouldThrowAnRedisOperationException() {
+    public void shouldThrowAnRedisOperationExceptionForGet() {
         when(this.client.connect()).thenReturn(this.connection);
         when(this.connection.sync()).thenReturn(this.redisCommands);
         when(this.redisCommands.get("testKey")).thenReturn(null);
