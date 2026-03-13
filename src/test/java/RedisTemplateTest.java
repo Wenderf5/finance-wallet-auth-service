@@ -89,4 +89,19 @@ public class RedisTemplateTest {
         verify(this.connection).sync();
         verify(this.redisCommands).get("testKey");
     }
+
+    @Test
+    public void shouldReturnTtlOfRecordInSeconds() {
+        when(this.client.connect()).thenReturn(this.connection);
+        when(this.connection.sync()).thenReturn(this.redisCommands);
+        when(this.redisCommands.setex("testKey", 300L, "testValue")).thenReturn("OK");
+        doNothing().when(this.connection).close();
+
+        this.redisTemplate.set("testKey", "testValue", 300L);
+
+        verify(this.client).connect();
+        verify(this.connection).sync();
+        verify(this.redisCommands).setex("testKey", 300L, "testValue");
+        verify(this.connection).close();
+    }
 }
