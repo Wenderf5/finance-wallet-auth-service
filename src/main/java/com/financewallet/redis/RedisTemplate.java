@@ -24,6 +24,17 @@ public class RedisTemplate {
         }
     }
 
+    public void set(String key, String value, Long ttl) {
+        try {
+            StatefulRedisConnection<String, String> connection = this.client.connect();
+            RedisCommands<String, String> redisCommands = connection.sync();
+            redisCommands.setex(key, ttl, value);
+            connection.close();
+        } catch (Exception e) {
+            throw new RedisOperationException(e.getMessage());
+        }
+    }
+
     public String get(String key) {
         try {
             StatefulRedisConnection<String, String> connection = this.client.connect();

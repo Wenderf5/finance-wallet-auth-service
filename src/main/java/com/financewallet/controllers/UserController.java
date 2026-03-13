@@ -58,13 +58,17 @@ public class UserController {
                     .build();
         }
 
+        Long ttl = this.userService.verifyCreateUserSessionToken(createUserSessionToken);
+
         JsonObject responseJson = new JsonObject();
         responseJson.addProperty("status", Response.Status.OK.getStatusCode());
-        responseJson.addProperty("token", createUserSessionToken);
+        responseJson.addProperty("seconds_to_expire:", ttl);
+
+        String reponseJsonString = this.gson.toJson(responseJson);
 
         return Response
                 .status(Response.Status.OK)
-                .entity(this.gson.toJson(responseJson))
+                .entity(reponseJsonString)
                 .build();
     }
 }
