@@ -59,11 +59,11 @@ public class RedisTemplate {
             RedisCommands<String, String> redisCommands = connection.sync();
 
             Long ttl = redisCommands.ttl(key);
-            if (ttl == -1) {
+            if (ttl == -1L) {
                 connection.close();
                 throw new Exception("The '" + key + "' key has not ttl.");
             }
-            if (ttl == -2) {
+            if (ttl == -2L) {
                 connection.close();
                 throw new Exception("The '" + key + "' key was not found.");
             }
