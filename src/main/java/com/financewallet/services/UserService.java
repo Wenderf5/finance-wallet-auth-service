@@ -4,6 +4,7 @@ import com.financewallet.DTOs.CreateUserDTO;
 import com.financewallet.dataBase.entities.UserEntity;
 import com.financewallet.dataBase.repositories.UserRepository;
 import com.financewallet.exceptions.EmailAlreadyExistException;
+import com.financewallet.exceptions.UnauthorizedException;
 import com.financewallet.redis.RedisTemplate;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -60,7 +61,7 @@ public class UserService {
             jsonObject.addProperty("emailCode", emailCode);
 
             String jsonValue = new Gson().toJson(jsonObject);
-            redisTemplate.set(createUserSessionToken, jsonValue);
+            redisTemplate.set(createUserSessionToken, jsonValue, 300L);
 
             Properties props = new Properties();
             props.put("mail.smtp.host", "smtp.gmail.com");
@@ -71,7 +72,8 @@ public class UserService {
             EmailDTO emailDTO = new EmailDTO(
                     user.getEmail(),
                     "Código de Confirmação - Finance Wallet",
-                    "Olá " + user.getUserName() + ",\n\nSeu código de confirmação de E-mail é: " + emailCode + "\n\nAtenciosamente Finance Wallet!");
+                    "Olá " + user.getUserName() + ",\n\nSeu código de confirmação de E-mail é: " + emailCode
+                            + "\n\nAtenciosamente Finance Wallet!");
 
             this.emailService
                     .getSession(props, System.getenv("EMAIL_SERVICE_USERNAME"), System.getenv("EMAIL_SERVICE_PASSWORD"))
@@ -116,5 +118,14 @@ public class UserService {
             cause = cause.getCause();
         }
         return false;
+    }
+
+    public Long verifyCreateUserSessionToken(String key) {
+        try {
+            Long ttl = this.redisTemplate.getTtl(key);
+            return ttl;
+        } catch (Exception e) {
+            throw new UnauthorizedException("Unauthorized");
+        }
     }
 }

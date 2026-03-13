@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.CookieParam;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -36,7 +38,7 @@ public class UserController {
                 .value(createUserSessionToken)
                 .path("/")
                 .maxAge(3600)
-                .secure(false) 
+                .secure(false)
                 .httpOnly(true)
                 .build();
 
@@ -44,6 +46,29 @@ public class UserController {
                 .status(Response.Status.OK)
                 .cookie(sessionCookie)
                 .entity(responseJsonString)
+                .build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response verifyCreateUserSessionToken(@CookieParam("createUserSessionToken") String createUserSessionToken) {
+        if (createUserSessionToken == null || createUserSessionToken.isEmpty()) {
+            return Response
+                    .status(Response.Status.UNAUTHORIZED)
+                    .build();
+        }
+
+        Long ttl = this.userService.verifyCreateUserSessionToken(createUserSessionToken);
+
+        JsonObject responseJson = new JsonObject();
+        responseJson.addProperty("status", Response.Status.OK.getStatusCode());
+        responseJson.addProperty("seconds_to_expire:", ttl);
+
+        String reponseJsonString = this.gson.toJson(responseJson);
+
+        return Response
+                .status(Response.Status.OK)
+                .entity(reponseJsonString)
                 .build();
     }
 }
