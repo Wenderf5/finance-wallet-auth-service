@@ -1,0 +1,13 @@
+#Build
+/target
+
+#Environment variables
+.env
+.env.development
+
+#IDE
+/.idea
+/.vscode
+
+#Docker
+/docker-compose.yml
