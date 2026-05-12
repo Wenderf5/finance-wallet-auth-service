@@ -15,9 +15,11 @@ import com.financewallet.auth.application.gateways.TokenService;
 @Service
 public class JwtService implements TokenService {
     private static final String ISSUER = "finance-wallet-auth";
-    
-    @Value("${JWT_SECRET_KEY}")
-    private String secretKey;
+    private final String secretKey;
+
+    public JwtService(@Value("${JWT_SECRET_KEY}") String secretKey) {
+        this.secretKey = secretKey;
+    }
 
     @Override
     public String generate() {
