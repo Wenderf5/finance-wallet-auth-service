@@ -9,15 +9,14 @@ import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-
-import com.financewallet.auth.application.gateways.TokenService;
+import com.financewallet.auth.application.services.TokenService;
 
 @Service
-public class JwtService implements TokenService {
+public class TokenServiceImp implements TokenService {
     private static final String ISSUER = "finance-wallet-auth";
     private final String secretKey;
 
-    public JwtService(@Value("${JWT_SECRET_KEY}") String secretKey) {
+    public TokenServiceImp(@Value("${JWT_SECRET_KEY}") String secretKey) {
         this.secretKey = secretKey;
     }
 

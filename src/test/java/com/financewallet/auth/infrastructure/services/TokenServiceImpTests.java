@@ -7,26 +7,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class JwtServiceTests {
-    private JwtService jwtService = new JwtService("test-secret-key");
+public class TokenServiceImpTests {
+    private TokenServiceImp tokenServiceImp = new TokenServiceImp("test-secret-key");
 
     @Test
     @DisplayName("should generate a jwt token")
     public void shouldGenerateJwtToken() {
-        String token = jwtService.generate();
+        String token = tokenServiceImp.generate();
         assertNotNull(token);
     }
 
     @Test
     @DisplayName("should validate a valid jwt token")
     public void shouldValidateJwtToken() {
-        String token = jwtService.generate();
-        assertTrue(jwtService.validate(token));
+        String token = tokenServiceImp.generate();
+        assertTrue(tokenServiceImp.validate(token));
     }
 
     @Test
     @DisplayName("should return false for invalid token")
     public void shouldReturnFalseForInvalidToken() {
-        assertFalse(jwtService.validate("invalid-token"));
+        assertFalse(tokenServiceImp.validate("invalid-token"));
     }
 }

@@ -1,4 +1,4 @@
-package com.financewallet.auth.application.gateways;
+package com.financewallet.auth.application.services;
 
 public interface TokenService {
     String generate();

@@ -1,7 +1,7 @@
 package com.financewallet.auth.infrastructure.adapters.out;
 
 import com.financewallet.auth.application.dto.Email;
-import com.financewallet.auth.application.gateways.EmailService;
+import com.financewallet.auth.application.gateways.EmailGateway;
 import com.financewallet.auth.infrastructure.exceptions.SendEmailException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 @Service
-public class EmailServiceImp implements EmailService {
+public class EmailGatewayImp implements EmailGateway {
 
     @Autowired
     private JavaMailSender mailSender;

@@ -29,7 +29,7 @@ class EmailServiceImpTests {
     private MimeMessage mimeMessage;
 
     @InjectMocks
-    private EmailServiceImp emailService;
+    private EmailGatewayImp emailGatewayImp;
 
     @Test
     @DisplayName("Should send email successfully")
@@ -38,7 +38,7 @@ class EmailServiceImpTests {
 
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
-        assertDoesNotThrow(() -> emailService.send(email));
+        assertDoesNotThrow(() -> emailGatewayImp.send(email));
 
         verify(mailSender).createMimeMessage();
         verify(mailSender).send(mimeMessage);
@@ -54,7 +54,7 @@ class EmailServiceImpTests {
         doThrow(new MessagingException("Setup failed"))
                 .when(faultyMessage).setContent(any(Multipart.class));
 
-        assertThrows(SendEmailException.class, () -> emailService.send(email));
+        assertThrows(SendEmailException.class, () -> emailGatewayImp.send(email));
         verify(mailSender, never()).send(any(MimeMessage.class));
     }
 }
