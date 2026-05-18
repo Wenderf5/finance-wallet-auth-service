@@ -7,7 +7,7 @@ COPY ./pom.xml ./pom.xml
 
 RUN ["mvn", "package"]
 
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:17-jdk AS runtime
 
 WORKDIR /app
 
