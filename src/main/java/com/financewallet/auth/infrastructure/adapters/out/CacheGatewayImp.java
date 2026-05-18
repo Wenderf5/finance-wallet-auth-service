@@ -21,9 +21,13 @@ public class CacheGatewayImp implements CacheGateway {
     @Override
     public String get(String key) {
         try {
-            return redisTemplate.opsForValue().get(key);
+            String result = redisTemplate.opsForValue().get(key);
+            if (result == null) {
+                throw new RuntimeException("The key " + key + " does not exist");
+            }
+            return result;
         } catch (Exception e) {
-            throw new CacheOperationException("Error retrieving value from cache for key: " + key, e);
+            throw new CacheOperationException(e.getMessage(), e);
         }
     }
 
@@ -32,7 +36,7 @@ public class CacheGatewayImp implements CacheGateway {
         try {
             redisTemplate.opsForValue().set(key, value);
         } catch (Exception e) {
-            throw new CacheOperationException("Error saving value to cache for key: " + key, e);
+            throw new CacheOperationException(e.getMessage(), e);
         }
     }
 
@@ -41,25 +45,37 @@ public class CacheGatewayImp implements CacheGateway {
         try {
             redisTemplate.opsForValue().set(key, value, ttl, TimeUnit.SECONDS);
         } catch (Exception e) {
-            throw new CacheOperationException("Error saving value to cache for key: " + key, e);
+            throw new CacheOperationException(e.getMessage(), e);
         }
     }
 
     @Override
     public Long getTtl(String key) {
         try {
-            return redisTemplate.getExpire(key, TimeUnit.SECONDS);
+            Long result = redisTemplate.getExpire(key, TimeUnit.SECONDS);
+
+            if (result.equals(-1L)) {
+                throw new RuntimeException("The key " + key + " does not have TTL");
+            }
+            if (result.equals(-2L)) {
+                throw new RuntimeException("The key " + key + " does not exist");
+            }
+
+            return result;
         } catch (Exception e) {
-            throw new CacheOperationException("Error retrieving TTL from cache for key: " + key, e);
+            throw new CacheOperationException(e.getMessage(), e);
         }
     }
 
     @Override
     public void delete(String key) {
         try {
-            redisTemplate.delete(key);
+            boolean result = redisTemplate.delete(key);
+            if (result == false) {
+                throw new RuntimeException("The key " + key + " does not exist");
+            }
         } catch (Exception e) {
-            throw new CacheOperationException("Error deleting value from cache for key: " + key, e);
+            throw new CacheOperationException(e.getMessage(), e);
         }
     }
 }
