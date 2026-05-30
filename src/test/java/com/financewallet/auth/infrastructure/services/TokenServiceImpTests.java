@@ -1,32 +1,44 @@
 package com.financewallet.auth.infrastructure.services;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.financewallet.auth.application.services.TokenService;
+
 public class TokenServiceImpTests {
-    private TokenServiceImp tokenServiceImp = new TokenServiceImp("test-secret-key");
+    private TokenService tokenService = new TokenServiceImp("test-secret-key");
 
     @Test
     @DisplayName("should generate a jwt token")
     public void shouldGenerateJwtToken() {
-        String token = tokenServiceImp.generate();
+        String token = tokenService.generate("TEST_TYPE", Instant.now().plus(5, ChronoUnit.MINUTES));
         assertNotNull(token);
     }
 
     @Test
     @DisplayName("should validate a valid jwt token")
     public void shouldValidateJwtToken() {
-        String token = tokenServiceImp.generate();
-        assertTrue(tokenServiceImp.validate(token));
+        String token = tokenService.generate("TEST_TYPE", Instant.now().plus(5, ChronoUnit.MINUTES));
+        assertNotNull(tokenService.validate(token, "TEST_TYPE"));
     }
 
     @Test
-    @DisplayName("should return false for invalid token")
-    public void shouldReturnFalseForInvalidToken() {
-        assertFalse(tokenServiceImp.validate("invalid-token"));
+    @DisplayName("should throw exception for invalid token")
+    public void shouldThrowExceptionForInvalidToken() {
+        assertThrows(JWTVerificationException.class, () -> tokenService.validate("invalid-token", "TEST_TYPE"));
+    }
+
+    @Test
+    @DisplayName("should throw exception for invalid token type")
+    public void shouldThrowExceptionForInvalidTokenType() {
+        String token = tokenService.generate("TEST_TYPE", Instant.now().plus(5, ChronoUnit.MINUTES));
+        assertThrows(JWTVerificationException.class, () -> tokenService.validate(token, "WRONG_TYPE"));
     }
 }
