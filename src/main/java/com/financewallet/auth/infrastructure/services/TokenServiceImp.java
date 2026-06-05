@@ -23,19 +23,22 @@ public class TokenServiceImp implements TokenService {
     @Override
     public String generate(String type, Instant exp) {
         return JWT.create()
-                .withIssuedAt(Instant.now())
-                .withExpiresAt(exp)
-                .withClaim("type", type)
-                .sign(algorithm);
+            .withIssuedAt(Instant.now())
+            .withExpiresAt(exp)
+            .withClaim("type", type)
+            .sign(algorithm);
     }
 
     @Override
     public String validate(String token, String type) {
         DecodedJWT decodedJWT = JWT.require(algorithm)
-                .withClaim("type", type)
-                .build()
-                .verify(token);
+            .withClaim("type", type)
+            .build()
+            .verify(token);
 
-        return new String(Base64.getUrlDecoder().decode(decodedJWT.getPayload()), StandardCharsets.UTF_8);
+        return new String(
+            Base64.getUrlDecoder().decode(decodedJWT.getPayload()),
+            StandardCharsets.UTF_8
+        );
     }
 }

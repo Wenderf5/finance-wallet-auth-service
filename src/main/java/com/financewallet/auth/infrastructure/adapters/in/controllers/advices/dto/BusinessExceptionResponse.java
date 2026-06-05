@@ -1,17 +1,15 @@
-package com.financewallet.auth.infrastructure.adapters.in.controllers.advice.dto;
+package com.financewallet.auth.infrastructure.adapters.in.controllers.advices.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ValidationErrorResponse {
+public class BusinessExceptionResponse {
     private int status;
-    private List<String> errors;
+    private String message;
 }

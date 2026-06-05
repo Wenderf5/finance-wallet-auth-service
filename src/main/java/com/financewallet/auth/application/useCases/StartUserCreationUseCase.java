@@ -13,10 +13,9 @@ import com.financewallet.auth.application.services.JsonService;
 import com.financewallet.auth.application.services.TokenService;
 import com.financewallet.auth.domain.entities.User;
 import com.financewallet.auth.domain.repositories.UserRepository;
-import com.financewallet.auth.domain.valueObjects.Email;
-import com.financewallet.auth.domain.valueObjects.Password;
+import com.financewallet.auth.application.dto.Email;
 
-public class StartUserCreation {
+public class StartUserCreationUseCase {
     private final UserRepository userRepository;
     private final TokenService tokenService;
     private final CodeGeneratorService codeGeneratorService;
@@ -24,13 +23,13 @@ public class StartUserCreation {
     private final JsonService jsonService;
     private final EmailGateway emailGateway;
 
-    public StartUserCreation(
-            UserRepository userRepository,
-            TokenService tokenService,
-            CodeGeneratorService codeGeneratorService,
-            CacheGateway cacheGateway,
-            JsonService jsonService,
-            EmailGateway emailGateway
+    public StartUserCreationUseCase(
+        UserRepository userRepository,
+        TokenService tokenService,
+        CodeGeneratorService codeGeneratorService,
+        CacheGateway cacheGateway,
+        JsonService jsonService,
+        EmailGateway emailGateway
     ) {
         this.userRepository = userRepository;
         this.tokenService = tokenService;
@@ -40,36 +39,44 @@ public class StartUserCreation {
         this.emailGateway = emailGateway;
     }
 
-    public String execute(String userName, Email email, Password password) {
+    public String execute(String userName, String email, String password) {
         // Check if the email address is already in use
         Optional<User> isUserExist = this.userRepository.findByEmail(email);
         if (isUserExist.isPresent()) {
-            throw new EmailAlreadyInUseException("A user with this email address already exists");
+            throw new EmailAlreadyInUseException(409, "A user with this email address already exists");
         }
 
-        // Temporarily saves the user data that will be created in the cache while the
-        // email code is being confirmed
-        String emailCode = this.codeGeneratorService.generate();
-        String token = this.tokenService.generate(
+        try {
+            // Temporarily saves the user data that will be created in the cache while the
+            // email code is being confirmed
+            String emailConfirmationCode = this.codeGeneratorService.generate();
+            String emailConfirmationToken = this.tokenService.generate(
                 "EMAIL_CONFIRMATION",
                 Instant.now().plus(5, ChronoUnit.MINUTES)
-        );
-        UserCreationDataCache userCreationDataCache = new UserCreationDataCache(
+            );
+            UserCreationDataCache userCreationDataCache = new UserCreationDataCache(
                 userName,
-                email.getEmail(),
-                password.getPassword(),
-                emailCode
-        );
-        this.cacheGateway.save(token, this.jsonService.toJson(userCreationDataCache), 300L);
+                email,
+                password,
+                emailConfirmationCode
+            );
+            this.cacheGateway.save(
+                emailConfirmationToken,
+                this.jsonService.toJson(userCreationDataCache),
+                300L
+            );
 
-        // Generate and send the code to the provided email address
-        com.financewallet.auth.application.dto.Email emailConfirmation = new com.financewallet.auth.application.dto.Email(
-                email.getEmail(),
+            // Generate and send the code to the provided email address
+            Email emailConfirmation = new Email(
+                email,
                 "Finance Wallet confirmation code",
-                "O código de confirmação é: " + emailCode
-        );
-        this.emailGateway.send(emailConfirmation);
+                "The confirmation code is: " + emailConfirmationCode
+            );
+            this.emailGateway.send(emailConfirmation);
 
-        return token;
+            return emailConfirmationToken;
+        } catch (Exception e) {
+            throw new RuntimeException("Error registering user");
+        }
     }
 }
