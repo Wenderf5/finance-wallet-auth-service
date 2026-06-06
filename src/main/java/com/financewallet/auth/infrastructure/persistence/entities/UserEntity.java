@@ -12,22 +12,22 @@ import java.util.UUID;
 @Table(name = "users")
 public class UserEntity {
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id", columnDefinition = "UUID", nullable = false)
     private UUID id;
 
-    @Column(name = "user_name", nullable = false)
+    @Column(name = "user_name", columnDefinition = "VARCHAR(75)", nullable = false)
     private String userName;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", columnDefinition = "VARCHAR(255)", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password", columnDefinition = "VARCHAR(128)", nullable = false)
     private String password;
 
-    @Column(name = "photo_url", nullable = false)
+    @Column(name = "photo_url", columnDefinition = "TEXT", nullable = false)
     private String photoUrl;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP", nullable = false)
     private LocalDateTime createdAt;
 
     public UserEntity() {
