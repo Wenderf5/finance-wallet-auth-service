@@ -3,13 +3,13 @@ package com.financewallet.auth.infrastructure.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.financewallet.auth.application.gateways.CacheGateway;
-import com.financewallet.auth.application.gateways.EmailGateway;
-import com.financewallet.auth.application.services.CodeGeneratorService;
-import com.financewallet.auth.application.services.JsonService;
-import com.financewallet.auth.application.services.TokenService;
-import com.financewallet.auth.application.useCases.StartUserCreationUseCase;
-import com.financewallet.auth.domain.repositories.UserRepository;
+import com.financewallet.auth.application.gateway.CacheGateway;
+import com.financewallet.auth.application.gateway.EmailGateway;
+import com.financewallet.auth.application.service.CodeGeneratorService;
+import com.financewallet.auth.application.service.JsonService;
+import com.financewallet.auth.application.service.TokenService;
+import com.financewallet.auth.application.usercase.StartUserRegistrationUseCase;
+import com.financewallet.auth.domain.repository.UserRepository;
 import com.google.gson.Gson;
 
 @Configuration
@@ -20,7 +20,7 @@ public class BeanConfig {
     }
 
     @Bean
-    public StartUserCreationUseCase startUserCreationUseCase(
+    public StartUserRegistrationUseCase startUserRegistrationUseCase(
         UserRepository userRepository,
         TokenService tokenService,
         CodeGeneratorService codeGeneratorService,
@@ -28,7 +28,7 @@ public class BeanConfig {
         JsonService jsonService,
         EmailGateway emailGateway
     ) {
-        return new StartUserCreationUseCase(
+        return new StartUserRegistrationUseCase(
             userRepository,
             tokenService,
             codeGeneratorService,
