@@ -1,4 +1,4 @@
-package com.financewallet.auth.infrastructure.adapter.in.controller.user;
+package com.financewallet.auth.infrastructure.adapter.in.controller.auth;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
@@ -19,10 +19,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.financewallet.auth.application.exception.EmailAlreadyInUseException;
 import com.financewallet.auth.application.usercase.StartUserRegistrationUseCase;
-import com.financewallet.auth.infrastructure.adapter.in.controller.user.dto.StartUserRegistrationRequest;
+import com.financewallet.auth.infrastructure.adapter.in.controller.auth.dto.StartUserRegistrationRequest;
 
-@WebMvcTest(UserController.class)
-public class UserControllerTest {
+@WebMvcTest(AuthController.class)
+public class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -42,13 +42,13 @@ public class UserControllerTest {
         when(startUserRegistrationUseCase.execute(userName, email, password)).thenReturn(token);
 
         mockMvc.perform(
-            post("/api/v1/user/registration")
+            post("/api/v1/auth/sign-up")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(new StartUserRegistrationRequest(userName, email, password)))
         )
         .andExpect(status().isOk())
         .andExpect(header().exists(HttpHeaders.SET_COOKIE))
-        .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("email_confirmation_token")));
+        .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("signup_session")));
     }
 
     @Test
@@ -59,7 +59,7 @@ public class UserControllerTest {
         String password = "short";
 
         mockMvc.perform(
-            post("/api/v1/user/registration")
+            post("/api/v1/auth/sign-up")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(new StartUserRegistrationRequest(userName, email, password)))
         )
@@ -79,7 +79,7 @@ public class UserControllerTest {
             .thenThrow(new EmailAlreadyInUseException(409, "A user with this email address already exists"));
 
         mockMvc.perform(
-            post("/api/v1/user/registration")
+            post("/api/v1/auth/sign-up")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(new StartUserRegistrationRequest(userName, email, password)))
         )
@@ -99,7 +99,7 @@ public class UserControllerTest {
             .thenThrow(new RuntimeException("Error registering user"));
 
         mockMvc.perform(
-            post("/api/v1/user/registration")
+            post("/api/v1/auth/sign-up")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(new StartUserRegistrationRequest(userName, email, password)))
         )

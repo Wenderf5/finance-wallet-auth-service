@@ -1,4 +1,4 @@
-package com.financewallet.auth.infrastructure.adapter.in.controller.user;
+package com.financewallet.auth.infrastructure.adapter.in.controller.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -11,34 +11,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.financewallet.auth.application.usercase.StartUserRegistrationUseCase;
-import com.financewallet.auth.infrastructure.adapter.in.controller.user.dto.StartUserRegistrationRequest;
+import com.financewallet.auth.infrastructure.adapter.in.controller.auth.dto.StartUserRegistrationRequest;
 
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/user")
-public class UserController {
+@RequestMapping("/api/v1/auth")
+public class AuthController {
     private final StartUserRegistrationUseCase startUserRegistrationUseCase;
 
     @Autowired
-    public UserController(StartUserRegistrationUseCase startUserRegistrationUseCase){
+    public AuthController(StartUserRegistrationUseCase startUserRegistrationUseCase){
         this.startUserRegistrationUseCase = startUserRegistrationUseCase;
     }
 
-    @PostMapping("/registration")
+    @PostMapping("/sign-up")
     public ResponseEntity<Void> startUserRegistration(
         @Valid
         @RequestBody
         StartUserRegistrationRequest body
     ){
-        String token = this.startUserRegistrationUseCase.execute(
+        String signUpSessionToken = this.startUserRegistrationUseCase.execute(
             body.getUserName(),
             body.getEmail(),
             body.getPassword()
         );
 
-        ResponseCookie cookie = ResponseCookie
-            .from("email_confirmation_token", token)
+        ResponseCookie signUpSessionCookie = ResponseCookie
+            .from("signup_session", signUpSessionToken)
             .httpOnly(true)
             .secure(false)
             .path("/")
@@ -48,7 +48,7 @@ public class UserController {
 
         return ResponseEntity
             .status(HttpStatus.OK)
-            .header(HttpHeaders.SET_COOKIE, cookie.toString())
+            .header(HttpHeaders.SET_COOKIE, signUpSessionCookie.toString())
             .build();
     }
 }
