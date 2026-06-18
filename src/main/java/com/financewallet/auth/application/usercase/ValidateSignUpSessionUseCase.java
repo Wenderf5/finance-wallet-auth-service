@@ -3,11 +3,11 @@ package com.financewallet.auth.application.usercase;
 import com.financewallet.auth.application.exception.UnauthorizedException;
 import com.financewallet.auth.application.service.TokenService;
 
-public class ValidateSignUpSession {
+public class ValidateSignUpSessionUseCase {
     private final TokenService tokenService;
     private final String SIGN_UP_SESSION_TOKEN_TYPE = "sign-up-session";
 
-    public ValidateSignUpSession(TokenService tokenService) {
+    public ValidateSignUpSessionUseCase(TokenService tokenService) {
         this.tokenService = tokenService;
     }
 
