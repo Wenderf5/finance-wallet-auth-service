@@ -9,6 +9,7 @@ import com.financewallet.auth.application.service.CodeGeneratorService;
 import com.financewallet.auth.application.service.JsonService;
 import com.financewallet.auth.application.service.TokenService;
 import com.financewallet.auth.application.usercase.StartUserRegistrationUseCase;
+import com.financewallet.auth.application.usercase.ValidateSignUpSessionUseCase;
 import com.financewallet.auth.domain.repository.UserRepository;
 import com.google.gson.Gson;
 
@@ -36,5 +37,10 @@ public class BeanConfig {
             jsonService,
             emailGateway
         );
+    }
+
+    @Bean
+    public ValidateSignUpSessionUseCase validateSignUpSessionUseCase(TokenService tokenService){
+        return new ValidateSignUpSessionUseCase(tokenService);
     }
 }

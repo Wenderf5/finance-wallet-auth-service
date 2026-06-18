@@ -2,6 +2,8 @@ package com.financewallet.auth.infrastructure.adapter.in.controller.auth;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,9 +18,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import jakarta.servlet.http.Cookie;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.financewallet.auth.application.exception.EmailAlreadyInUseException;
+import com.financewallet.auth.application.exception.UnauthorizedException;
 import com.financewallet.auth.application.usercase.StartUserRegistrationUseCase;
+import com.financewallet.auth.application.usercase.ValidateSignUpSessionUseCase;
 import com.financewallet.auth.infrastructure.adapter.in.controller.auth.dto.StartUserRegistrationRequest;
 
 @WebMvcTest(AuthController.class)
@@ -30,6 +35,9 @@ public class AuthControllerTest {
 
     @MockitoBean
     private StartUserRegistrationUseCase startUserRegistrationUseCase;
+
+    @MockitoBean
+    private ValidateSignUpSessionUseCase validateSignUpSessionUseCase;
 
     @Test
     @DisplayName("Should return 200 and a cookie email confirmation token")
@@ -106,5 +114,63 @@ public class AuthControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.status").value(400))
         .andExpect(jsonPath("$.message").value("Error registering user"));
+    }
+
+    @Test
+    @DisplayName("Should return 200 when session token is valid")
+    public void shouldReturn200WhenSessionTokenIsValid() throws Exception {
+        String token = "valid-session-token";
+
+        mockMvc.perform(
+            get("/api/v1/auth/sign-up/session")
+            .cookie(new Cookie("signup_session", token))
+        )
+        .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Should return 401 when session cookie is missing")
+    public void shouldReturn401WhenSessionCookieIsMissing() throws Exception {
+        doThrow(new UnauthorizedException(401, "Invalid session token"))
+            .when(validateSignUpSessionUseCase).execute(null);
+
+        mockMvc.perform(
+            get("/api/v1/auth/sign-up/session")
+        )
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.status").value(401))
+        .andExpect(jsonPath("$.message").value("Invalid session token"));
+    }
+
+    @Test
+    @DisplayName("Should return 401 when session token is invalid")
+    public void shouldReturn401WhenSessionTokenIsInvalid() throws Exception {
+        String token = "invalid-session-token";
+        doThrow(new UnauthorizedException(401, "Invalid session token"))
+            .when(validateSignUpSessionUseCase).execute(token);
+
+        mockMvc.perform(
+            get("/api/v1/auth/sign-up/session")
+            .cookie(new Cookie("signup_session", token))
+        )
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.status").value(401))
+        .andExpect(jsonPath("$.message").value("Invalid session token"));
+    }
+
+    @Test
+    @DisplayName("Should return 401 when session token is empty")
+    public void shouldReturn401WhenSessionTokenIsEmpty() throws Exception {
+        String token = "";
+        doThrow(new UnauthorizedException(401, "Invalid session token"))
+            .when(validateSignUpSessionUseCase).execute(token);
+
+        mockMvc.perform(
+            get("/api/v1/auth/sign-up/session")
+            .cookie(new Cookie("signup_session", token))
+        )
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.status").value(401))
+        .andExpect(jsonPath("$.message").value("Invalid session token"));
     }
 }
