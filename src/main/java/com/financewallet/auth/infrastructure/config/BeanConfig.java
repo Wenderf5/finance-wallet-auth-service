@@ -8,6 +8,7 @@ import com.financewallet.auth.application.gateway.EmailGateway;
 import com.financewallet.auth.application.service.CodeGeneratorService;
 import com.financewallet.auth.application.service.JsonService;
 import com.financewallet.auth.application.service.TokenService;
+import com.financewallet.auth.application.usercase.CompleteUserRegistrationUseCase;
 import com.financewallet.auth.application.usercase.StartUserRegistrationUseCase;
 import com.financewallet.auth.application.usercase.ValidateSignUpSessionUseCase;
 import com.financewallet.auth.domain.repository.UserRepository;
@@ -38,9 +39,24 @@ public class BeanConfig {
             emailGateway
         );
     }
-
+  
     @Bean
     public ValidateSignUpSessionUseCase validateSignUpSessionUseCase(TokenService tokenService){
         return new ValidateSignUpSessionUseCase(tokenService);
+    }
+
+    @Bean
+    public CompleteUserRegistrationUseCase completeUserRegistrationUseCase(
+        CacheGateway cacheGateway,
+        JsonService jsonService, 
+        UserRepository userRepository,
+        TokenService tokenService
+    ) {
+        return new CompleteUserRegistrationUseCase(
+            cacheGateway,
+            jsonService,
+            userRepository,
+            tokenService
+        );
     }
 }
