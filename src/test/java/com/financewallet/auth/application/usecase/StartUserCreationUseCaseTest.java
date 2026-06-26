@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.financewallet.auth.application.dto.UserRegistrationDataCache;
 import com.financewallet.auth.application.exception.EmailAlreadyInUseException;
@@ -47,6 +48,9 @@ class StartUserRegistrationUseCaseTest {
     @Mock
     private EmailGateway emailGateway;
 
+    @Mock
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
     @InjectMocks
     private StartUserRegistrationUseCase startUserRegistrationUseCase;
 
@@ -74,6 +78,7 @@ class StartUserRegistrationUseCaseTest {
         when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
         when(codeGeneratorService.generate()).thenReturn(generatedCode);
         when(tokenService.generate(eq(SIGN_UP_SESSION_TOKEN_TYPE), any(Instant.class))).thenReturn(generatedToken);
+        when(bCryptPasswordEncoder.encode(validPassword)).thenReturn("$2a$10$VdN0Qe2Jw2j9Qk6FJY1v6uV2d5lR5mK2rWqP3v7N8xA1sC4eF6gHi");
         when(jsonService.toJson(any(UserRegistrationDataCache.class))).thenReturn(serializedJson);
 
         String result = startUserRegistrationUseCase.execute(userName, validEmail, validPassword);
@@ -107,6 +112,7 @@ class StartUserRegistrationUseCaseTest {
         when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
         when(codeGeneratorService.generate()).thenReturn(generatedCode);
         when(tokenService.generate(eq(SIGN_UP_SESSION_TOKEN_TYPE), any(Instant.class))).thenReturn(generatedToken);
+        when(bCryptPasswordEncoder.encode(validPassword)).thenReturn("$2a$10$VdN0Qe2Jw2j9Qk6FJY1v6uV2d5lR5mK2rWqP3v7N8xA1sC4eF6gHi");
         when(jsonService.toJson(any(UserRegistrationDataCache.class))).thenReturn(serializedJson);
         
         doThrow(new RuntimeException("Cache error")).when(cacheGateway).save(anyString(), anyString(), anyLong());
@@ -127,6 +133,7 @@ class StartUserRegistrationUseCaseTest {
         when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
         when(codeGeneratorService.generate()).thenReturn(generatedCode);
         when(tokenService.generate(eq(SIGN_UP_SESSION_TOKEN_TYPE), any(Instant.class))).thenReturn(generatedToken);
+         when(bCryptPasswordEncoder.encode(validPassword)).thenReturn("$2a$10$VdN0Qe2Jw2j9Qk6FJY1v6uV2d5lR5mK2rWqP3v7N8xA1sC4eF6gHi");
         when(jsonService.toJson(any(UserRegistrationDataCache.class))).thenReturn(serializedJson);
         
         doThrow(new RuntimeException("Email error")).when(emailGateway).send(any(Email.class));

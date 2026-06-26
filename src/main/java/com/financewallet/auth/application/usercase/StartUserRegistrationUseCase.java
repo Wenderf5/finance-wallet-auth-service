@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import com.financewallet.auth.application.dto.UserRegistrationDataCache;
 import com.financewallet.auth.application.exception.EmailAlreadyInUseException;
 import com.financewallet.auth.application.gateway.CacheGateway;
@@ -23,6 +25,7 @@ public class StartUserRegistrationUseCase {
     private final JsonService jsonService;
     private final EmailGateway emailGateway;
     private final String SIGN_UP_SESSION_TOKEN_TYPE = "sign-up-session";
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public StartUserRegistrationUseCase(
         UserRepository userRepository,
@@ -30,7 +33,8 @@ public class StartUserRegistrationUseCase {
         CodeGeneratorService codeGeneratorService,
         CacheGateway cacheGateway,
         JsonService jsonService,
-        EmailGateway emailGateway
+        EmailGateway emailGateway,
+        BCryptPasswordEncoder bCryptPasswordEncoder
     ) {
         this.userRepository = userRepository;
         this.tokenService = tokenService;
@@ -38,6 +42,7 @@ public class StartUserRegistrationUseCase {
         this.cacheGateway = cacheGateway;
         this.jsonService = jsonService;
         this.emailGateway = emailGateway;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     public String execute(String userName, String email, String password) {
@@ -58,7 +63,7 @@ public class StartUserRegistrationUseCase {
             UserRegistrationDataCache userRegistrationDataCache = new UserRegistrationDataCache(
                 userName,
                 email,
-                password,
+                this.bCryptPasswordEncoder.encode(password),
                 emailConfirmationCode
             );
             this.cacheGateway.save(
