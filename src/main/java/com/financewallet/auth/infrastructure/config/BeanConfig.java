@@ -2,6 +2,7 @@ package com.financewallet.auth.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.financewallet.auth.application.gateway.CacheGateway;
 import com.financewallet.auth.application.gateway.EmailGateway;
@@ -28,7 +29,8 @@ public class BeanConfig {
         CodeGeneratorService codeGeneratorService,
         CacheGateway cacheGateway,
         JsonService jsonService,
-        EmailGateway emailGateway
+        EmailGateway emailGateway,
+        BCryptPasswordEncoder bCryptPasswordEncoder
     ) {
         return new StartUserRegistrationUseCase(
             userRepository,
@@ -36,7 +38,8 @@ public class BeanConfig {
             codeGeneratorService,
             cacheGateway,
             jsonService,
-            emailGateway
+            emailGateway,
+            bCryptPasswordEncoder
         );
     }
   
@@ -58,5 +61,10 @@ public class BeanConfig {
             userRepository,
             tokenService
         );
+    }
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 }
