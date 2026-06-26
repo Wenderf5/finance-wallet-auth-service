@@ -32,8 +32,6 @@ import com.financewallet.auth.application.exception.UnauthorizedException;
 import com.financewallet.auth.application.usercase.ValidateSignUpSessionUseCase;
 import com.financewallet.auth.infrastructure.adapter.in.controller.auth.dto.StartUserRegistrationRequest;
 
-import jakarta.servlet.http.Cookie;
-
 @WebMvcTest(AuthController.class)
 public class AuthControllerTest {
     @Autowired
