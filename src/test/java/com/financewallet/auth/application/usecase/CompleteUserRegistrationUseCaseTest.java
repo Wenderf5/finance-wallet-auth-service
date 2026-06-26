@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.financewallet.auth.application.dto.UserRegistrationDataCache;
 import com.financewallet.auth.application.exception.EmailCodeException;
+import com.financewallet.auth.application.exception.EmailCodeExpiredException;
 import com.financewallet.auth.infrastructure.exception.CacheOperationException;
 import com.financewallet.auth.application.gateway.CacheGateway;
 import com.financewallet.auth.application.service.JsonService;
@@ -98,18 +99,18 @@ public class CompleteUserRegistrationUseCaseTest {
     }
 
     @Test
-    @DisplayName("Should throw CacheOperationException when cacheGateway cannot find the record in cache")
-    public void shouldThrowCacheOperationExceptionWhenCacheIsMissing() {
+    @DisplayName("Should throw EmailCodeExpiredException when cacheGateway cannot find the record in cache")
+    public void shouldThrowEmailCodeExpiredExceptionWhenCacheIsMissing() {
         String testKey = "testKey";
 
         doThrow(new CacheOperationException("The key testKey does not exist"))
             .when(this.cacheGateway).get(testKey);
 
-        CacheOperationException exception = assertThrows(CacheOperationException.class, () -> {
+        EmailCodeExpiredException exception = assertThrows(EmailCodeExpiredException.class, () -> {
             this.completeUserRegistrationUseCase.execute("123456", testKey);
         });
 
-        assertEquals("The key testKey does not exist", exception.getMessage());
+        assertEquals("Verification code has expired", exception.getMessage());
     }
 
     @Test

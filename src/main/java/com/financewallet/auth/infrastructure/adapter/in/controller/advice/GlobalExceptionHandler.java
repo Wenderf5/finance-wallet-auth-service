@@ -41,6 +41,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<GenericExceptionResponse> handleGenericException(RuntimeException ex){
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(new GenericExceptionResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+            .body(new GenericExceptionResponse(HttpStatus.BAD_REQUEST.value(), "An unexpected error occurred. Please try again later."));
     }
 }

@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 
 import com.financewallet.auth.application.dto.UserRegistrationDataCache;
 import com.financewallet.auth.application.exception.EmailCodeException;
+import com.financewallet.auth.application.exception.EmailCodeExpiredException;
 import com.financewallet.auth.application.gateway.CacheGateway;
 import com.financewallet.auth.application.service.JsonService;
 import com.financewallet.auth.application.service.TokenService;
@@ -32,7 +33,13 @@ public class CompleteUserRegistrationUseCase {
 
     public String execute(String code, String key) {
         //Retrieves user data from cache
-        String userRegistrationDataCache = this.cacheGateway.get(key);
+        String userRegistrationDataCache;
+        try {
+            userRegistrationDataCache = this.cacheGateway.get(key);
+        } catch (Exception e) {
+           throw new EmailCodeExpiredException(400, "Verification code has expired");
+        }
+
         UserRegistrationDataCache userData = this.jsonService.fromJson(userRegistrationDataCache, UserRegistrationDataCache.class);
 
         //it verifies the email code
