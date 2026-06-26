@@ -11,9 +11,9 @@ FROM eclipse-temurin:17-jdk AS runtime
 
 WORKDIR /app
 
-COPY --from=build /app/target/auth-0.0.1-SNAPSHOT.jar ./auth-0.0.1-SNAPSHOT.jar
+COPY --from=build /app/target/finance-wallet-auth-0.0.1-SNAPSHOT.jar ./finance-wallet-auth-0.0.1-SNAPSHOT.jar
 
 EXPOSE 8080
 
 ENTRYPOINT ["java"]
-CMD ["-jar", "./auth-0.0.1-SNAPSHOT.jar"]
+CMD ["-jar", "./finance-wallet-auth-0.0.1-SNAPSHOT.jar"]

@@ -22,6 +22,7 @@ public class StartUserRegistrationUseCase {
     private final CacheGateway cacheGateway;
     private final JsonService jsonService;
     private final EmailGateway emailGateway;
+    private final String SIGN_UP_SESSION_TOKEN_TYPE = "sign-up-session";
 
     public StartUserRegistrationUseCase(
         UserRepository userRepository,
@@ -50,8 +51,8 @@ public class StartUserRegistrationUseCase {
             // Temporarily saves the user data that will be created in the cache while the
             // email code is being confirmed
             String emailConfirmationCode = this.codeGeneratorService.generate();
-            String emailConfirmationToken = this.tokenService.generate(
-                "EMAIL_CONFIRMATION",
+            String signupSessionToken = this.tokenService.generate(
+                SIGN_UP_SESSION_TOKEN_TYPE,
                 Instant.now().plus(5, ChronoUnit.MINUTES)
             );
             UserRegistrationDataCache userRegistrationDataCache = new UserRegistrationDataCache(
@@ -61,7 +62,7 @@ public class StartUserRegistrationUseCase {
                 emailConfirmationCode
             );
             this.cacheGateway.save(
-                emailConfirmationToken,
+                signupSessionToken,
                 this.jsonService.toJson(userRegistrationDataCache),
                 300L
             );
@@ -74,7 +75,7 @@ public class StartUserRegistrationUseCase {
             );
             this.emailGateway.send(emailConfirmation);
 
-            return emailConfirmationToken;
+            return signupSessionToken;
         } catch (Exception e) {
             throw new RuntimeException("Error registering user");
         }

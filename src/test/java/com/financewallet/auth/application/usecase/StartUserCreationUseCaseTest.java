@@ -56,6 +56,7 @@ class StartUserRegistrationUseCaseTest {
     private String generatedCode;
     private String generatedToken;
     private String serializedJson;
+    private final String SIGN_UP_SESSION_TOKEN_TYPE = "sign-up-session";
 
     @BeforeEach
     void setUp() {
@@ -72,7 +73,7 @@ class StartUserRegistrationUseCaseTest {
     void shouldCreateUserSuccessfullyAndReturnToken() {
         when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
         when(codeGeneratorService.generate()).thenReturn(generatedCode);
-        when(tokenService.generate(eq("EMAIL_CONFIRMATION"), any(Instant.class))).thenReturn(generatedToken);
+        when(tokenService.generate(eq(SIGN_UP_SESSION_TOKEN_TYPE), any(Instant.class))).thenReturn(generatedToken);
         when(jsonService.toJson(any(UserRegistrationDataCache.class))).thenReturn(serializedJson);
 
         String result = startUserRegistrationUseCase.execute(userName, validEmail, validPassword);
@@ -105,7 +106,7 @@ class StartUserRegistrationUseCaseTest {
     void shouldThrowErrorIfSavingInCacheFails() {
         when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
         when(codeGeneratorService.generate()).thenReturn(generatedCode);
-        when(tokenService.generate(eq("EMAIL_CONFIRMATION"), any(Instant.class))).thenReturn(generatedToken);
+        when(tokenService.generate(eq(SIGN_UP_SESSION_TOKEN_TYPE), any(Instant.class))).thenReturn(generatedToken);
         when(jsonService.toJson(any(UserRegistrationDataCache.class))).thenReturn(serializedJson);
         
         doThrow(new RuntimeException("Cache error")).when(cacheGateway).save(anyString(), anyString(), anyLong());
@@ -125,7 +126,7 @@ class StartUserRegistrationUseCaseTest {
     void shouldThrowErrorIfEmailSendingFails() {
         when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
         when(codeGeneratorService.generate()).thenReturn(generatedCode);
-        when(tokenService.generate(eq("EMAIL_CONFIRMATION"), any(Instant.class))).thenReturn(generatedToken);
+        when(tokenService.generate(eq(SIGN_UP_SESSION_TOKEN_TYPE), any(Instant.class))).thenReturn(generatedToken);
         when(jsonService.toJson(any(UserRegistrationDataCache.class))).thenReturn(serializedJson);
         
         doThrow(new RuntimeException("Email error")).when(emailGateway).send(any(Email.class));
