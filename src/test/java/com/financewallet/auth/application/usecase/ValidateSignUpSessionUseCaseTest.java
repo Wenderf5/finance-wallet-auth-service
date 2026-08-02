@@ -15,15 +15,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.financewallet.auth.application.exception.UnauthorizedException;
-import com.financewallet.auth.application.service.TokenService;
+import com.financewallet.auth.application.service.JwtService;
 import com.financewallet.auth.application.usercase.ValidateSignUpSessionUseCase;
+import com.financewallet.auth.domain.valueObject.TokenType;
 
 @ExtendWith(MockitoExtension.class)
 public class ValidateSignUpSessionUseCaseTest {
-    private final String SIGN_UP_SESSION_TOKEN_TYPE = "sign-up-session";
-
     @Mock
-    private TokenService tokenService;
+    private JwtService tokenService;
 
     @InjectMocks
     private ValidateSignUpSessionUseCase validateSignUpSessionUseCase;
@@ -31,7 +30,7 @@ public class ValidateSignUpSessionUseCaseTest {
     @Test
     @DisplayName("Should validate the token successfully")
     public void shouldValidateTokenSuccessfully(){
-        when(tokenService.validate("valid-token", SIGN_UP_SESSION_TOKEN_TYPE)).thenReturn("Decoded-token");
+        when(tokenService.validate("valid-token", TokenType.SIGNUP_SESSION_TOKEN)).thenReturn("Decoded-token");
 
         assertDoesNotThrow(() -> {
             this.validateSignUpSessionUseCase.execute("valid-token");
@@ -42,7 +41,7 @@ public class ValidateSignUpSessionUseCaseTest {
     @Test
     @DisplayName("Should throw UnauthorizedException when token is invalid")
     public void shouldThrowUnauthorizedExceptionWhenTokenIsInvalid(){
-        when(tokenService.validate("invalid-token", SIGN_UP_SESSION_TOKEN_TYPE)).thenThrow(JWTVerificationException.class);
+        when(tokenService.validate("invalid-token", TokenType.SIGNUP_SESSION_TOKEN)).thenThrow(JWTVerificationException.class);
 
         assertThrows(UnauthorizedException.class, () -> {
             this.validateSignUpSessionUseCase.execute("invalid-token");
@@ -56,7 +55,7 @@ public class ValidateSignUpSessionUseCaseTest {
             this.validateSignUpSessionUseCase.execute(null);
         });
 
-        verify(this.tokenService, never()).validate(null, SIGN_UP_SESSION_TOKEN_TYPE);
+        verify(this.tokenService, never()).validate(null, TokenType.SIGNUP_SESSION_TOKEN);
     }
 
     @Test
@@ -66,6 +65,6 @@ public class ValidateSignUpSessionUseCaseTest {
             this.validateSignUpSessionUseCase.execute("");
         });
 
-        verify(this.tokenService, never()).validate("", SIGN_UP_SESSION_TOKEN_TYPE);
+        verify(this.tokenService, never()).validate("", TokenType.SIGNUP_SESSION_TOKEN);
     }
 }

@@ -8,8 +8,9 @@ import com.financewallet.auth.application.gateway.CacheGateway;
 import com.financewallet.auth.application.gateway.EmailGateway;
 import com.financewallet.auth.application.service.CodeGeneratorService;
 import com.financewallet.auth.application.service.JsonService;
-import com.financewallet.auth.application.service.TokenService;
+import com.financewallet.auth.application.service.JwtService;
 import com.financewallet.auth.application.usercase.CompleteUserRegistrationUseCase;
+import com.financewallet.auth.application.usercase.RefreshTokenUseCase;
 import com.financewallet.auth.application.usercase.StartUserRegistrationUseCase;
 import com.financewallet.auth.application.usercase.ValidateSignUpSessionUseCase;
 import com.financewallet.auth.domain.repository.UserRepository;
@@ -25,7 +26,7 @@ public class BeanConfig {
     @Bean
     public StartUserRegistrationUseCase startUserRegistrationUseCase(
         UserRepository userRepository,
-        TokenService tokenService,
+        JwtService tokenService,
         CodeGeneratorService codeGeneratorService,
         CacheGateway cacheGateway,
         JsonService jsonService,
@@ -44,7 +45,7 @@ public class BeanConfig {
     }
   
     @Bean
-    public ValidateSignUpSessionUseCase validateSignUpSessionUseCase(TokenService tokenService){
+    public ValidateSignUpSessionUseCase validateSignUpSessionUseCase(JwtService tokenService){
         return new ValidateSignUpSessionUseCase(tokenService);
     }
 
@@ -53,7 +54,7 @@ public class BeanConfig {
         CacheGateway cacheGateway,
         JsonService jsonService, 
         UserRepository userRepository,
-        TokenService tokenService
+        JwtService tokenService
     ) {
         return new CompleteUserRegistrationUseCase(
             cacheGateway,
@@ -61,6 +62,11 @@ public class BeanConfig {
             userRepository,
             tokenService
         );
+    }
+
+    @Bean
+    public RefreshTokenUseCase refreshTokenUseCase(JwtService jwtService) {
+        return new RefreshTokenUseCase(jwtService);
     }
 
     @Bean

@@ -18,16 +18,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.financewallet.auth.application.dto.CompleteUserRegistrationUseCaseResponse;
 import com.financewallet.auth.application.dto.UserRegistrationDataCache;
 import com.financewallet.auth.application.exception.EmailCodeException;
 import com.financewallet.auth.application.exception.EmailCodeExpiredException;
 import com.financewallet.auth.infrastructure.exception.CacheOperationException;
 import com.financewallet.auth.application.gateway.CacheGateway;
 import com.financewallet.auth.application.service.JsonService;
-import com.financewallet.auth.application.service.TokenService;
+import com.financewallet.auth.application.service.JwtService;
 import com.financewallet.auth.application.usercase.CompleteUserRegistrationUseCase;
 import com.financewallet.auth.domain.entity.User;
 import com.financewallet.auth.domain.repository.UserRepository;
+import com.financewallet.auth.domain.valueObject.TokenType;
 
 @ExtendWith(MockitoExtension.class)
 public class CompleteUserRegistrationUseCaseTest {
@@ -41,19 +43,18 @@ public class CompleteUserRegistrationUseCaseTest {
     private UserRepository userRepository;
 
     @Mock
-    private TokenService tokenService;
+    private JwtService tokenService;
 
     @InjectMocks
     private CompleteUserRegistrationUseCase completeUserRegistrationUseCase;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private String ACCESS_TOKEN_TYPE = "access_token";
-
     @Test
-    @DisplayName("Should return access token when everything is ok")
-    public void shouldReturnAccessToken() throws JsonProcessingException{
-        String testToken = "testToken";
+    @DisplayName("Should return access token and refresh token when everything is ok")
+    public void shouldReturnAccessTokenAndRefreshToken() throws JsonProcessingException{
+        String testAccessToken = "testAccessToken";
+        String testRefreshToken = "testRefreshToken";
         String testEmailCode = "123456";
         String testKey = "testKey";
 
@@ -67,10 +68,12 @@ public class CompleteUserRegistrationUseCaseTest {
 
         when(this.cacheGateway.get(testKey)).thenReturn(userRegistrationDataCacheString);
         when(this.jsonService.fromJson(userRegistrationDataCacheString, UserRegistrationDataCache.class)).thenReturn(userRegistrationDataCache);
-        when(this.tokenService.generate(eq(ACCESS_TOKEN_TYPE), any(Instant.class))).thenReturn(testToken);
+        when(this.tokenService.generate(eq(TokenType.ACCESS_TOKEN), any(Instant.class))).thenReturn(testAccessToken);
+        when(this.tokenService.generate(eq(TokenType.REFRESH_TOKEN), any(Instant.class))).thenReturn(testRefreshToken);
 
-        String result = this.completeUserRegistrationUseCase.execute(userRegistrationDataCache.getEmailCode(), testKey);
-        assertEquals(testToken, result);
+        CompleteUserRegistrationUseCaseResponse result = this.completeUserRegistrationUseCase.execute(userRegistrationDataCache.getEmailCode(), testKey);
+        assertEquals(testAccessToken, result.getAccessToken());
+        assertEquals(testRefreshToken, result.getRefreshToken());
     }
 
     @Test

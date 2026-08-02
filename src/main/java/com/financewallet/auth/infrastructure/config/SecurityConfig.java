@@ -17,6 +17,7 @@ public class SecurityConfig {
             .requestMatchers("/api/v1/auth/sign-up").permitAll()
             .requestMatchers("/api/v1/auth/sign-up/session").permitAll()
             .requestMatchers("/api/v1/auth/sign-up/confirm").permitAll()
+            .requestMatchers("/api/v1/auth/refresh").permitAll()
             .anyRequest().authenticated()
         )
         .csrf(csrf -> csrf.disable())
