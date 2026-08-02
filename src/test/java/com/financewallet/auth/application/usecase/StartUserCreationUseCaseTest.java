@@ -23,10 +23,11 @@ import com.financewallet.auth.application.gateway.CacheGateway;
 import com.financewallet.auth.application.gateway.EmailGateway;
 import com.financewallet.auth.application.service.CodeGeneratorService;
 import com.financewallet.auth.application.service.JsonService;
-import com.financewallet.auth.application.service.TokenService;
+import com.financewallet.auth.application.service.JwtService;
 import com.financewallet.auth.application.usercase.StartUserRegistrationUseCase;
 import com.financewallet.auth.domain.entity.User;
 import com.financewallet.auth.domain.repository.UserRepository;
+import com.financewallet.auth.domain.valueObject.TokenType;
 
 @ExtendWith(MockitoExtension.class)
 class StartUserRegistrationUseCaseTest {
@@ -34,7 +35,7 @@ class StartUserRegistrationUseCaseTest {
     private UserRepository userRepository;
 
     @Mock
-    private TokenService tokenService;
+    private JwtService tokenService;
 
     @Mock
     private CodeGeneratorService codeGeneratorService;
@@ -60,7 +61,6 @@ class StartUserRegistrationUseCaseTest {
     private String generatedCode;
     private String generatedToken;
     private String serializedJson;
-    private final String SIGN_UP_SESSION_TOKEN_TYPE = "sign-up-session";
 
     @BeforeEach
     void setUp() {
@@ -77,7 +77,7 @@ class StartUserRegistrationUseCaseTest {
     void shouldCreateUserSuccessfullyAndReturnToken() {
         when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
         when(codeGeneratorService.generate()).thenReturn(generatedCode);
-        when(tokenService.generate(eq(SIGN_UP_SESSION_TOKEN_TYPE), any(Instant.class))).thenReturn(generatedToken);
+        when(tokenService.generate(eq(TokenType.SIGNUP_SESSION_TOKEN), any(Instant.class))).thenReturn(generatedToken);
         when(bCryptPasswordEncoder.encode(validPassword)).thenReturn("$2a$10$VdN0Qe2Jw2j9Qk6FJY1v6uV2d5lR5mK2rWqP3v7N8xA1sC4eF6gHi");
         when(jsonService.toJson(any(UserRegistrationDataCache.class))).thenReturn(serializedJson);
 
@@ -111,7 +111,7 @@ class StartUserRegistrationUseCaseTest {
     void shouldThrowErrorIfSavingInCacheFails() {
         when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
         when(codeGeneratorService.generate()).thenReturn(generatedCode);
-        when(tokenService.generate(eq(SIGN_UP_SESSION_TOKEN_TYPE), any(Instant.class))).thenReturn(generatedToken);
+        when(tokenService.generate(eq(TokenType.SIGNUP_SESSION_TOKEN), any(Instant.class))).thenReturn(generatedToken);
         when(bCryptPasswordEncoder.encode(validPassword)).thenReturn("$2a$10$VdN0Qe2Jw2j9Qk6FJY1v6uV2d5lR5mK2rWqP3v7N8xA1sC4eF6gHi");
         when(jsonService.toJson(any(UserRegistrationDataCache.class))).thenReturn(serializedJson);
         
@@ -132,7 +132,7 @@ class StartUserRegistrationUseCaseTest {
     void shouldThrowErrorIfEmailSendingFails() {
         when(userRepository.findByEmail(validEmail)).thenReturn(Optional.empty());
         when(codeGeneratorService.generate()).thenReturn(generatedCode);
-        when(tokenService.generate(eq(SIGN_UP_SESSION_TOKEN_TYPE), any(Instant.class))).thenReturn(generatedToken);
+        when(tokenService.generate(eq(TokenType.SIGNUP_SESSION_TOKEN), any(Instant.class))).thenReturn(generatedToken);
          when(bCryptPasswordEncoder.encode(validPassword)).thenReturn("$2a$10$VdN0Qe2Jw2j9Qk6FJY1v6uV2d5lR5mK2rWqP3v7N8xA1sC4eF6gHi");
         when(jsonService.toJson(any(UserRegistrationDataCache.class))).thenReturn(serializedJson);
         

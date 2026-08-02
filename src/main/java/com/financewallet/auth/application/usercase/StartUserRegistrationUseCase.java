@@ -12,24 +12,24 @@ import com.financewallet.auth.application.gateway.CacheGateway;
 import com.financewallet.auth.application.gateway.EmailGateway;
 import com.financewallet.auth.application.service.CodeGeneratorService;
 import com.financewallet.auth.application.service.JsonService;
-import com.financewallet.auth.application.service.TokenService;
+import com.financewallet.auth.application.service.JwtService;
 import com.financewallet.auth.domain.entity.User;
 import com.financewallet.auth.domain.repository.UserRepository;
+import com.financewallet.auth.domain.valueObject.TokenType;
 import com.financewallet.auth.application.dto.Email;
 
 public class StartUserRegistrationUseCase {
     private final UserRepository userRepository;
-    private final TokenService tokenService;
+    private final JwtService jwtService;
     private final CodeGeneratorService codeGeneratorService;
     private final CacheGateway cacheGateway;
     private final JsonService jsonService;
     private final EmailGateway emailGateway;
-    private final String SIGN_UP_SESSION_TOKEN_TYPE = "sign-up-session";
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public StartUserRegistrationUseCase(
         UserRepository userRepository,
-        TokenService tokenService,
+        JwtService jwtService,
         CodeGeneratorService codeGeneratorService,
         CacheGateway cacheGateway,
         JsonService jsonService,
@@ -37,7 +37,7 @@ public class StartUserRegistrationUseCase {
         BCryptPasswordEncoder bCryptPasswordEncoder
     ) {
         this.userRepository = userRepository;
-        this.tokenService = tokenService;
+        this.jwtService = jwtService;
         this.codeGeneratorService = codeGeneratorService;
         this.cacheGateway = cacheGateway;
         this.jsonService = jsonService;
@@ -56,8 +56,8 @@ public class StartUserRegistrationUseCase {
             // Temporarily saves the user data that will be created in the cache while the
             // email code is being confirmed
             String emailConfirmationCode = this.codeGeneratorService.generate();
-            String signupSessionToken = this.tokenService.generate(
-                SIGN_UP_SESSION_TOKEN_TYPE,
+            String signupSessionToken = this.jwtService.generate(
+                TokenType.SIGNUP_SESSION_TOKEN,
                 Instant.now().plus(5, ChronoUnit.MINUTES)
             );
             UserRegistrationDataCache userRegistrationDataCache = new UserRegistrationDataCache(

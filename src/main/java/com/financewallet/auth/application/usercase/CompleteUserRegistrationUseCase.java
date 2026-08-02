@@ -3,27 +3,28 @@ package com.financewallet.auth.application.usercase;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import com.financewallet.auth.application.dto.CompleteUserRegistrationUseCaseResponse;
 import com.financewallet.auth.application.dto.UserRegistrationDataCache;
 import com.financewallet.auth.application.exception.EmailCodeException;
 import com.financewallet.auth.application.exception.EmailCodeExpiredException;
 import com.financewallet.auth.application.gateway.CacheGateway;
 import com.financewallet.auth.application.service.JsonService;
-import com.financewallet.auth.application.service.TokenService;
+import com.financewallet.auth.application.service.JwtService;
 import com.financewallet.auth.domain.entity.User;
 import com.financewallet.auth.domain.repository.UserRepository;
+import com.financewallet.auth.domain.valueObject.TokenType;
 
 public class CompleteUserRegistrationUseCase {
     private final CacheGateway cacheGateway;
     private final JsonService jsonService;
     private final UserRepository userRepository;
-    private final TokenService tokenService;
-    private final String ACCESS_TOKEN_TYPE = "access_token";
+    private final JwtService tokenService;
 
     public CompleteUserRegistrationUseCase(
         CacheGateway cacheGateway,
-        JsonService jsonService, 
+        JsonService jsonService,
         UserRepository userRepository,
-        TokenService tokenService
+        JwtService tokenService
     ){
         this.cacheGateway = cacheGateway;
         this.jsonService = jsonService;
@@ -31,7 +32,7 @@ public class CompleteUserRegistrationUseCase {
         this.tokenService = tokenService;
     }
 
-    public String execute(String code, String key) {
+    public CompleteUserRegistrationUseCaseResponse execute(String code, String key) {
         //Retrieves user data from cache
         String userRegistrationDataCache;
         try {
@@ -56,15 +57,21 @@ public class CompleteUserRegistrationUseCase {
         );
         this.userRepository.save(user);
 
-        //Generates an access token for the new user
+        //Generates access token with 15 minutes expiration
         String accessToken = this.tokenService.generate(
-            ACCESS_TOKEN_TYPE,
+            TokenType.ACCESS_TOKEN,
+            Instant.now().plus(15, ChronoUnit.MINUTES)
+        );
+
+        //Generates refresh token with 7 days expiration
+        String refreshToken = this.tokenService.generate(
+            TokenType.REFRESH_TOKEN,
             Instant.now().plus(7, ChronoUnit.DAYS)
         );
 
         //Clears temporary user data from cache
         this.cacheGateway.delete(key);
 
-        return accessToken;
+        return new CompleteUserRegistrationUseCaseResponse(accessToken, refreshToken);
     }
 }

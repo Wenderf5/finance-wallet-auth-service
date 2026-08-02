@@ -22,10 +22,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import jakarta.servlet.http.Cookie;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.financewallet.auth.application.dto.CompleteUserRegistrationUseCaseResponse;
 import com.financewallet.auth.application.exception.EmailAlreadyInUseException;
 import com.financewallet.auth.application.exception.EmailCodeException;
 import com.financewallet.auth.application.exception.EmailCodeExpiredException;
 import com.financewallet.auth.application.usercase.CompleteUserRegistrationUseCase;
+import com.financewallet.auth.application.usercase.RefreshTokenUseCase;
 import com.financewallet.auth.application.usercase.StartUserRegistrationUseCase;
 import com.financewallet.auth.infrastructure.adapter.in.controller.auth.dto.CompleteUserRegistrationRequest;
 import com.financewallet.auth.application.exception.UnauthorizedException;
@@ -41,12 +43,15 @@ public class AuthControllerTest {
 
     @MockitoBean
     private StartUserRegistrationUseCase startUserRegistrationUseCase;
-  
+
     @MockitoBean
     private ValidateSignUpSessionUseCase validateSignUpSessionUseCase;
 
     @MockitoBean
     private CompleteUserRegistrationUseCase completeUserRegistrationUseCase;
+
+    @MockitoBean
+    private RefreshTokenUseCase refreshTokenUseCase;
 
     @Nested
     class SignUp {
@@ -189,13 +194,15 @@ public class AuthControllerTest {
     @Nested
     class SignUpConfirm {
         @Test
-        @DisplayName("Should return 201 and cookies when everything is ok")
-        public void shouldReturn201AndCookiesWhenEverythingIsOk() throws Exception {
+        @DisplayName("Should return 201 and tokens when everything is ok")
+        public void shouldReturn201AndTokensWhenEverythingIsOk() throws Exception {
             CompleteUserRegistrationRequest completeUserRegistrationRequest = new CompleteUserRegistrationRequest("123456");
             String signupSessionToken = "session-token";
             String accessToken = "access-token";
+            String refreshToken = "refresh-token";
+            CompleteUserRegistrationUseCaseResponse completeUserRegistrationUseCaseResponse = new CompleteUserRegistrationUseCaseResponse(accessToken, refreshToken);
 
-            when(completeUserRegistrationUseCase.execute("123456", signupSessionToken)).thenReturn(accessToken);
+            when(completeUserRegistrationUseCase.execute("123456", signupSessionToken)).thenReturn(completeUserRegistrationUseCaseResponse);
 
             mockMvc.perform(
                 post("/api/v1/auth/sign-up/confirm")
@@ -204,10 +211,11 @@ public class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(completeUserRegistrationRequest))
             )
             .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.accessToken").value(accessToken))
             .andExpect(cookie().exists("signup_session"))
             .andExpect(cookie().maxAge("signup_session", 0))
-            .andExpect(cookie().exists("access_cookie"))
-            .andExpect(cookie().value("access_cookie", accessToken));
+            .andExpect(cookie().exists("refresh_token"))
+            .andExpect(cookie().value("refresh_token", refreshToken));
         }
 
         @Test
